@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angle Finder - AI Story Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #fafafa; color: #1a1a1a; }
+        .serif { font-family: 'Crimson Pro', serif; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+        
+        header { background: white; border-bottom: 1px solid #e5e5e5; padding: 1rem 0; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .logo-group { display: flex; align-items: center; gap: 0.5rem; }
+        .logo { width: 28px; height: 28px; background: #2563eb; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; }
+        .logo-text { font-size: 0.9rem; font-weight: 600; }
+        .powered-by { font-size: 0.75rem; color: #999; }
+        
+        .hero { text-align: center; padding: 4rem 0 3rem; }
+        .hero-title { font-size: 3.5rem; font-weight: 600; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .highlight { color: #2563eb; font-style: italic; }
+        .hero-subtitle { font-size: 1.125rem; color: #666; line-height: 1.7; max-width: 700px; margin: 0 auto 3rem; }
+        
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 4rem; }
+        .feature { text-align: center; }
+        .feature-icon { width: 48px; height: 48px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 24px; }
+        .icon-blue { background: #dbeafe; }
+        .icon-green { background: #d1fae5; }
+        .icon-purple { background: #e9d5ff; }
+        .feature-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.5rem; }
+        .feature-desc { font-size: 0.875rem; color: #666; line-height: 1.6; }
+        
+        .input-card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 2rem; margin-bottom: 3rem; }
+        .input-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; }
+        .input-subtitle { font-size: 0.875rem; color: #666; margin-bottom: 1rem; line-height: 1.6; }
+        textarea { width: 100%; min-height: 280px; padding: 1rem; border: 1px solid #e5e5e5; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9375rem; line-height: 1.6; resize: vertical; }
+        textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .char-count { font-size: 0.75rem; color: #999; text-align: right; margin-top: 0.5rem; }
+        .btn-group { display: flex; gap: 0.75rem; margin-top: 1rem; }
+        .btn { flex: 1; padding: 0.875rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9375rem; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+        .btn-primary:disabled { background: #e5e5e5; color: #999; cursor: not-allowed; }
+        .btn-secondary { background: white; color: #2563eb; border: 1px solid #2563eb; }
+        .btn-secondary:hover { background: #eff6ff; }
+        
+        .info-banner { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 1rem 1rem 1rem 3rem; margin-bottom: 4rem; position: relative; }
+        .info-banner::before { content: 'ℹ'; position: absolute; left: 1rem; top: 1rem; color: #0284c7; font-weight: bold; }
+        .info-title { font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem; }
+        .info-text { font-size: 0.8125rem; color: #666; line-height: 1.6; }
+        
+        .loading { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.98); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .loading-content { text-align: center; max-width: 400px; }
+        .spinner { width: 48px; height: 48px; border: 3px solid #e5e5e5; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .loading-stage { color: #666; font-size: 0.9375rem; margin-bottom: 1rem; }
+        .progress-bar-bg { width: 300px; height: 8px; background: #e5e5e5; border-radius: 4px; margin: 0 auto 0.5rem; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 4px; transition: width 0.3s; }
+        .progress-text { font-size: 0.875rem; color: #666; }
+        
+        .results-header { background: white; border-bottom: 1px solid #e5e5e5; padding: 1rem 0; }
+        .results-header-flex { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 2rem; flex-wrap: wrap; gap: 1rem; }
+        .back-btn { color: #2563eb; background: none; border: none; cursor: pointer; font-weight: 500; font-size: 0.875rem; padding: 0.5rem 0; }
+        .back-btn:hover { color: #1d4ed8; text-decoration: underline; }
+        .export-btns { display: flex; gap: 0.5rem; }
+        .export-btn { padding: 0.625rem 1.25rem; font-size: 0.875rem; font-weight: 600; color: #2563eb; background: #eff6ff; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .export-btn:hover { background: #dbeafe; }
+        
+        .results-content { padding: 2rem 0 4rem; }
+        .result-section { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+        .section-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .section-title-group { display: flex; gap: 1rem; align-items: start; }
+        .section-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .section-title { font-size: 1.375rem; font-weight: 600; margin-top: 0.25rem; }
+        .copy-btn { padding: 0.5rem 1rem; font-size: 0.8125rem; font-weight: 500; color: #666; background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .copy-btn:hover { background: #f3f4f6; border-color: #d1d5db; }
+        .section-content { color: #374151; font-size: 1rem; line-height: 1.8; }
+        .section-content h3 { font-size: 1.125rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #1a1a1a; }
+        .section-content ul { margin: 1rem 0 1rem 1.5rem; list-style-type: disc; }
+        .section-content li { margin: 0.5rem 0; padding-left: 0.25rem; }
+        .section-content p { margin: 1rem 0; }
+        .section-content strong { font-weight: 600; color: #1a1a1a; }
+        
+        footer { background: white; border-top: 1px solid #e5e5e5; padding: 2.5rem 0; text-align: center; }
+        .footer-logo-group { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .footer-logo { width: 20px; height: 20px; background: #2563eb; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; }
+        .footer-logo-text { font-weight: 600; font-size: 0.875rem; }
+        .footer-tagline { font-size: 0.8125rem; color: #666; margin-bottom: 1rem; }
+        .footer-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+        .footer-links a { color: #999; text-decoration: none; font-size: 0.8125rem; }
+        .footer-links a:hover { color: #666; }
+        
+        .hidden { display: none !important; }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.25rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .features { grid-template-columns: 1fr; gap: 2rem; }
+            .btn-group { flex-direction: column; }
+            .header-flex, .results-header-flex, .container { padding: 0 1rem; }
+            .hero { padding: 3rem 0 2rem; }
+            .input-card, .result-section { padding: 1.5rem; }
+            .section-header { flex-direction: column; }
+            .copy-btn, .export-btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div id="landing">
+        <header>
+            <div class="header-flex">
+                <div class="logo-group">
+                    <div class="logo">A</div>
+                    <span class="logo-text">ANGLE FINDER</span>
+                </div>
+                <div class="powered-by">Powered by <strong style="color: #666;">Claude AI</strong></div>
+            </div>
+        </header>
+        <div class="container">
+            <div class="hero">
+                <h1 class="hero-title serif">Transform transcripts into<br><span class="highlight">front-page stories.</span></h1>
+                <p class="hero-subtitle">AI-powered content analysis designed for journalists. Paste meeting transcripts, interview notes, or press conference text and instantly get story ideas, key takeaways, and next steps.</p>
+            </div>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon icon-blue">💡</div>
+                    <div class="feature-title">Story Ideas</div>
+                    <p class="feature-desc">AI identifies 3-5 potential story angles with headlines and newsworthiness assessment.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon icon-green">📊</div>
+                    <div class="feature-title">Key Takeaways</div>
+                    <p class="feature-desc">Main points, decisions, and newsworthy moments extracted from your content.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon icon-purple">📋</div>
+                    <div class="feature-title">Next Steps</div>
+                    <p class="feature-desc">Actionable reporting guidance: sources to contact, documents to request, research needed.</p>
+                </div>
+            </div>
+            <div class="input-card">
+                <h3 class="input-title serif">Paste your transcript or meeting notes</h3>
+                <p class="input-subtitle">Copy and paste text from meeting transcripts, interview notes, press conferences, or any journalistic content you want to analyze.</p>
+                <textarea id="transcript" placeholder="Paste your content here...
+
+Example: City Council Meeting - January 15, 2026
+
+Mayor Johnson opened the meeting at 7:00 PM. The first item on the agenda was the proposed budget reallocation of $2 million from infrastructure to technology initiatives. Board members raised concerns about the lack of community input..."></textarea>
+                <div class="char-count"><span id="count">0</span> characters • Minimum 50 characters</div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="analyze-btn" disabled onclick="analyzeContent()">Analyze Content</button>
+                    <button class="btn btn-secondary" onclick="showDemo()">Try Demo Example</button>
+                </div>
+            </div>
+            <div class="info-banner">
+                <div class="info-title">AI handles analysis and research assistance.</div>
+                <p class="info-text">All editorial decisions, source verification, and final story judgment remain with human journalists. This tool saves time on operational tasks so you can focus on reporting.</p>
+            </div>
+        </div>
+        <footer>
+            <div class="footer-logo-group">
+                <div class="footer-logo">A</div>
+                <span class="footer-logo-text">ANGLE FINDER</span>
+            </div>
+            <p class="footer-tagline">Built for journalists who need operational efficiency without compromising editorial integrity.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </footer>
+    </div>
+
+    <div id="loading" class="loading hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h2 class="loading-title serif">Analyzing Your Content</h2>
+            <p class="loading-stage" id="stage">Processing...</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            <p class="progress-text" id="progress-text">0%</p>
+        </div>
+    </div>
+
+    <div id="results-page" class="hidden">
+        <div class="results-header">
+            <div class="results-header-flex">
+                <button class="back-btn" onclick="goBack()">← Analyze Another</button>
+                <div class="export-btns">
+                    <button class="export-btn" onclick="exportText()">📄 Export Text</button>
+                    <button class="export-btn" onclick="exportMarkdown()">📝 Export Markdown</button>
+                </div>
+            </div>
+        </div>
+        <div class="container results-content">
+            <div class="result-section">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <div class="section-icon icon-blue">💡</div>
+                        <h2 class="section-title serif">Story Ideas</h2>
+                    </div>
+                    <button class="copy-btn" onclick="copySection('ideas')">📋 Copy</button>
+                </div>
+                <div class="section-content" id="ideas-content"></div>
+            </div>
+            <div class="result-section">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <div class="section-icon icon-green">📊</div>
+                        <h2 class="section-title serif">Key Takeaways</h2>
+                    </div>
+                    <button class="copy-btn" onclick="copySection('takeaways')">📋 Copy</button>
+                </div>
+                <div class="section-content" id="takeaways-content"></div>
+            </div>
+            <div class="result-section">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <div class="section-icon icon-purple">📋</div>
+                        <h2 class="section-title serif">Next Steps for Reporter</h2>
+                    </div>
+                    <button class="copy-btn" onclick="copySection('steps')">📋 Copy</button>
+                </div>
+                <div class="section-content" id="steps-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const demoResults = {
+            ideas: `<h3><strong>1. Unauthorized Budget Shift Raises Governance Concerns</strong></h3>
+<p>The superintendent's $2 million reallocation from facilities to technology without board approval represents a significant procedural breach. This angle focuses on the governance implications and potential policy violations.</p>
+<ul>
+<li><strong>Who's affected:</strong> Taxpayers, facility maintenance staff, students in aging buildings</li>
+<li><strong>Why it matters:</strong> Sets precedent for bypassing democratic oversight on major financial decisions</li>
+<li><strong>Newsworthiness:</strong> Procedural violations in public spending, potential legal issues</li>
+</ul>
+
+<h3><strong>2. Teacher Exodus Signals Deeper Workplace Crisis</strong></h3>
+<p>With 23% turnover nearly double the district average, this represents a systemic retention problem that threatens educational quality and institutional knowledge.</p>
+<ul>
+<li><strong>Who's affected:</strong> Students losing experienced teachers, remaining staff facing increased workload, families concerned about educational continuity</li>
+<li><strong>Why it matters:</strong> High turnover costs districts significantly in recruitment and training while disrupting student learning</li>
+<li><strong>Newsworthiness:</strong> Human interest angle with measurable community impact</li>
+</ul>
+
+<h3><strong>3. Special Education Cuts Under State Investigation</strong></h3>
+<p>Reduced services for special needs students during an active compliance review could result in legal liability and federal funding consequences.</p>
+<ul>
+<li><strong>Who's affected:</strong> Special education students and families, district's legal and financial standing</li>
+<li><strong>Why it matters:</strong> Potential IEP violations carry serious legal and financial consequences under federal law</li>
+<li><strong>Newsworthiness:</strong> Vulnerable population, legal accountability, state oversight angle</li>
+</ul>
+
+<h3><strong>4. Security Expansion Without Financial Plan</strong></h3>
+<p>Administration seeks major security investment (40 cameras, 2 officers) without presenting costs or funding sources, following questionable budget practices.</p>
+<ul>
+<li><strong>Who's affected:</strong> All students and staff, taxpayers funding the expansion</li>
+<li><strong>Why it matters:</strong> Public safety vs. fiscal responsibility, pattern of poor financial planning</li>
+<li><strong>Newsworthiness:</strong> Safety concerns, budget accountability, community priorities</li>
+</ul>`,
+            
+            takeaways: `<ul>
+<li><strong>$2M budget reallocation announced</strong> without standard board approval process, shifting funds from facilities maintenance to technology initiatives</li>
+<li><strong>23% teacher turnover rate revealed,</strong> nearly double the 12% district average, with no formal retention plan presented to address the crisis</li>
+<li><strong>Special education service reductions confirmed</strong> during active state compliance review, raising questions about IEP compliance and legal obligations</li>
+<li><strong>Security expansion proposed</strong> including 40 additional cameras and 2 resource officers, but no cost analysis or identified funding sources provided</li>
+<li><strong>Community input process challenged</strong> by multiple residents who noted online comments submitted weeks prior were not addressed in meeting agenda</li>
+<li><strong>Finance director warned explicitly</strong> that facilities budget reduction will compound existing $8M maintenance backlog with long-term infrastructure consequences</li>
+<li><strong>Teachers union representative directly connected</strong> retention crisis to compensation and working conditions, rejecting technology investment as solution</li>
+<li><strong>Parents of special education students raised concerns</strong> about reduced therapy sessions and support hours, requesting transparency about service changes</li>
+</ul>`,
+            
+            steps: `<h3><strong>Immediate Follow-Up Actions (24-48 hours)</strong></h3>
+<ul>
+<li>Request board financial policies and procedures manual to verify whether proper approval process was followed for $2M reallocation</li>
+<li>Contact board policy chair for on-record statement about procedural compliance and governance concerns</li>
+<li>Interview 2-3 departing teachers about specific reasons for leaving (use HR exit interview data if available through public records request)</li>
+<li>Reach out to special education parents who spoke at meeting for detailed accounts of service reductions and IEP compliance concerns</li>
+<li>Contact state education department for status update on compliance review scope and preliminary findings</li>
+</ul>
+
+<h3><strong>Documents to Request via Public Records</strong></h3>
+<ul>
+<li>Board financial policies and procedures manual (approval requirements for budget amendments)</li>
+<li>Previous budget amendment records with approval timelines for comparison</li>
+<li>Teacher retention and turnover data for past 5 years</li>
+<li>Exit interview summaries or aggregated data from HR department</li>
+<li>State education department compliance review documentation and correspondence</li>
+<li>Security proposal details including cost estimates and funding source proposals</li>
+<li>Public comment submissions from online portal (verify claims about ignored input)</li>
+<li>Facilities maintenance backlog reports and deferred maintenance documentation</li>
+</ul>
+
+<h3><strong>Background Research Needed</strong></h3>
+<ul>
+<li>Review 2022 audit findings that flagged informal decision-making processes in district governance</li>
+<li>Compare teacher turnover rates and retention strategies with neighboring districts</li>
+<li>Research special education funding requirements and compliance obligations under IDEA (Individuals with Disabilities Education Act)</li>
+<li>Investigate typical costs and effectiveness research for school resource officers and security camera systems</li>
+<li>Examine state open meetings law requirements regarding public comment procedures</li>
+</ul>
+
+<h3><strong>Time-Sensitive Actions & Deadlines</strong></h3>
+<ul>
+<li>Monitor next board meeting agenda (likely February) to see if budget reallocation appears for formal approval</li>
+<li>Track state education department website for public release of compliance review findings</li>
+<li>Follow up with superintendent's office within one week about security proposal cost analysis timeline</li>
+<li>Attend next board meeting to observe whether community input procedures are addressed or modified</li>
+</ul>
+
+<h3><strong>Additional Story Angles to Explore</strong></h3>
+<ul>
+<li>Profile departing teachers: Why are experienced educators leaving? What would make them stay?</li>
+<li>Community perspective: How do residents feel about budget priorities (technology vs. facilities vs. teacher retention)?</li>
+<li>Historical context: Has this board had previous governance or transparency issues?</li>
+<li>Financial analysis: What's the true cost of high teacher turnover to the district?</li>
+</ul>`
+        };
+
+        let currentResults = null;
+
+        const textarea = document.getElementById('transcript');
+        const countDisplay = document.getElementById('count');
+        const analyzeBtn = document.getElementById('analyze-btn');
+
+        textarea.addEventListener('input', function() {
+            const length = this.value.length;
+            countDisplay.textContent = length.toLocaleString();
+            analyzeBtn.disabled = length < 50;
+        });
+
+        function showDemo() {
+            currentResults = demoResults;
+            document.getElementById('landing').classList.add('hidden');
+            document.getElementById('results-page').classList.remove('hidden');
+            document.getElementById('ideas-content').innerHTML = currentResults.ideas;
+            document.getElementById('takeaways-content').innerHTML = currentResults.takeaways;
+            document.getElementById('steps-content').innerHTML = currentResults.steps;
+        }
+
+        function analyzeContent() {
+            if (textarea.value.length < 50) {
+                alert('Please enter at least 50 characters');
+                return;
+            }
+            
+            document.getElementById('landing').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            
+            let progress = 0;
+            const progressBar = document.getElementById('progress');
+            const progressText = document.getElementById('progress-text');
+            const stageText = document.getElementById('stage');
+            const stages = [
+                { pct: 25, msg: 'Processing content...' },
+                { pct: 50, msg: 'Identifying story angles...' },
+                { pct: 75, msg: 'Extracting key points...' },
+                { pct: 100, msg: 'Finalizing analysis...' }
+            ];
+            
+            let currentStage = 0;
+            const interval = setInterval(function() {
+                if (currentStage < stages.length) {
+                    const stage = stages[currentStage];
+                    progressBar.style.width = stage.pct + '%';
+                    progressText.textContent = stage.pct + '%';
+                    stageText.textContent = stage.msg;
+                    currentStage++;
+                    
+                    if (currentStage >= stages.length) {
+                        clearInterval(interval);
+                        currentResults = demoResults;
+                        setTimeout(function() {
+                            document.getElementById('loading').classList.add('hidden');
+                            document.getElementById('results-page').classList.remove('hidden');
+                            document.getElementById('ideas-content').innerHTML = currentResults.ideas;
+                            document.getElementById('takeaways-content').innerHTML = currentResults.takeaways;
+                            document.getElementById('steps-content').innerHTML = currentResults.steps;
+                        }, 300);
+                    }
+                }
+            }, 700);
+        }
+
+        function goBack() {
+            document.getElementById('results-page').classList.add('hidden');
+            document.getElementById('landing').classList.remove('hidden');
+            textarea.value = '';
+            countDisplay.textContent = '0';
+            analyzeBtn.disabled = true;
+        }
+
+        function copySection(section) {
+            let content = '';
+            if (section === 'ideas') content = currentResults.ideas;
+            else if (section === 'takeaways') content = currentResults.takeaways;
+            else content = currentResults.steps;
+            
+            const cleanText = content.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
+            
+            navigator.clipboard.writeText(cleanText).then(function() {
+                alert('✓ Copied to clipboard!');
+            }).catch(function() {
+                alert('Failed to copy. Please try again.');
+            });
+        }
+
+        function exportText() {
+            const content = 'ANGLE FINDER ANALYSIS\n' + '='.repeat(70) + '\n' +
+                'Generated: ' + new Date().toLocaleString() + '\n\n' +
+                'STORY IDEAS\n' + '='.repeat(70) + '\n' +
+                currentResults.ideas.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim() + '\n\n' +
+                'KEY TAKEAWAYS\n' + '='.repeat(70) + '\n' +
+                currentResults.takeaways.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim() + '\n\n' +
+                'NEXT STEPS FOR REPORTER\n' + '='.repeat(70) + '\n' +
+                currentResults.steps.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
+            
+            downloadFile(content, 'angle-finder-analysis.txt', 'text/plain');
+        }
+
+        function exportMarkdown() {
+            const content = '# Angle Finder Analysis\n\n' +
+                '**Generated:** ' + new Date().toLocaleString() + '\n\n---\n\n' +
+                '## Story Ideas\n\n' +
+                currentResults.ideas.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim() + '\n\n---\n\n' +
+                '## Key Takeaways\n\n' +
+                currentResults.takeaways.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim() + '\n\n---\n\n' +
+                '## Next Steps for Reporter\n\n' +
+                currentResults.steps.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
+            
+            downloadFile(content, 'angle-finder-analysis.md', 'text/markdown');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type: type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
